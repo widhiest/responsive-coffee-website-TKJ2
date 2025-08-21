@@ -1,4 +1,15 @@
+version: "3.8"
+
 services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./ca.pem:/etc/phpmyadmin/ca.pem:ro
+    restart: unless-stopped
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
@@ -11,4 +22,6 @@ services:
       PMA_SSL: "true"
       PMA_SSL_CA: /etc/phpmyadmin/ca.pem
     ports:
-      - "8000:80"
+      - "8081:80"
+    volumes:
+      - ./ca.pem:/etc/phpmyadmin/ca.pem:ro
