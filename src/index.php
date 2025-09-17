@@ -1,35 +1,29 @@
 <?php
-// index_fixed.php
-// Perbaikan file HTML/PHP untuk menampilkan data produk dari DB dengan PDO
-
-// Mulai output buffering untuk mencegah whitespace issues
+// index.php - Updated with cart functionality
+session_start();
 ob_start();
 
-include "koneksi.php"; // pastikan koneksi.php sudah pakai PDO ($pdo)
+include "koneksi.php";
 
-// Tampilkan error sementara saat debugging (hapus/komentari di production)
-// ini_set('display_errors', 1);
-// error_reporting(E_ALL);
+// Initialize cart if not exists
+if (!isset($_SESSION['cart'])) {
+    $_SESSION['cart'] = [];
+}
 
-$products = []; // Inisialisasi array kosong
+$products = [];
 $hasError = false;
 $errorMessage = '';
 
 try {
-    // Ambil data produk
     $sql = "SELECT * FROM Menu ORDER BY MenuID ASC";
     $stmt = $pdo->query($sql);
-
-    // Ambil semua hasil
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
     $hasError = true;
     $errorMessage = "Database error: " . $e->getMessage();
-    // Jangan die() di sini, biarkan halaman tetap tampil
 }
 
-// Clean output buffer sebelum HTML
 ob_end_clean();
 ?><!DOCTYPE html>
 <html lang="en">
@@ -50,6 +44,91 @@ ob_end_clean();
     <link rel="stylesheet" href="assets/css/styles.css">
 
     <title>Responsive coffee website - Bedimcode</title>
+    
+    <!-- Cart Styles -->
+    <style>
+        .nav__actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .nav__cart {
+            position: relative;
+            color: var(--white-color);
+            font-size: 1.5rem;
+            transition: color .4s;
+        }
+        
+        .nav__cart:hover {
+            color: var(--first-color);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--first-color);
+            color: var(--white-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-semi-bold);
+            min-width: 20px;
+        }
+        
+        .cart-count:empty {
+            display: none;
+        }
+        
+        .products__button {
+            transition: all .3s ease;
+        }
+        
+        .products__button:hover {
+            transform: scale(1.1);
+            background-color: var(--first-color-alt);
+        }
+        
+        .products__button.adding {
+            animation: pulse 0.6s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .cart-notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: var(--first-color);
+            color: var(--white-color);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .cart-notification.show {
+            transform: translateX(0);
+        }
+        
+        @media screen and (max-width: 1150px) {
+            .nav__actions {
+                position: absolute;
+                right: 4rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!--==================== HEADER ====================-->
@@ -81,12 +160,28 @@ ob_end_clean();
                 </div>
             </div>
 
-            <!-- Toggle button -->
-            <div class="nav__toggle" id="nav-toggle">
-                <i class="ri-apps-2-fill"></i>
+            <!-- Navigation Actions -->
+            <div class="nav__actions">
+                <a href="cart.php" class="nav__cart">
+                    <i class="ri-shopping-cart-line"></i>
+                    <span class="cart-count" id="cart-count"><?= array_sum($_SESSION['cart']) > 0 ? array_sum($_SESSION['cart']) : '' ?></span>
+                </a>
+                
+                <!-- Toggle button -->
+                <div class="nav__toggle" id="nav-toggle">
+                    <i class="ri-apps-2-fill"></i>
+                </div>
             </div>
         </nav>
     </header>
+
+    <!-- Cart Notification -->
+    <div class="cart-notification" id="cart-notification">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="ri-check-line"></i>
+            <span>Added to cart!</span>
+        </div>
+    </div>
 
     <!--==================== MAIN ====================-->
     <main class="main">
@@ -128,45 +223,6 @@ ob_end_clean();
                         <article class="popular__card swiper-slide">
                             <div class="popular__images">
                                 <div class="popular__shape"></div>
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
-                                <img src="assets/img/popular-coffee-1.png" alt="image" class="popular__coffee">
-                            </div>
-
-                            <div class="popular__data">
-                                <h2 class="popular__name">VANILLA LATTE</h2>
-
-                                <p class="popular__description">
-                                    Indulge in the simplicity of our delicicous cold brew coffee.
-                                </p>
-
-                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
-                            </div>
-                        </article>
-
-                        <article class="popular__card swiper-slide">
-                            <div class="popular__images">
-                                <div class="popular__shape"></div>
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
-                                <img src="assets/img/popular-coffee-2.png" alt="image" class="popular__coffee">
-                            </div>
-
-                            <div class="popular__data">
-                                <h2 class="popular__name">CLASSIC COFFEE</h2>
-
-                                <p class="popular__description">
-                                    Indulge in the simplicity of our delicicous cold brew coffee.
-                                </p>
-
-                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
-                            </div>
-                        </article>
-
-                        <article class="popular__card swiper-slide">
-                            <div class="popular__images">
-                                <div class="popular__shape"></div>
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
                                 <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
                                 <img src="assets/img/popular-coffee-3.png" alt="image" class="popular__coffee">
                             </div>
@@ -243,7 +299,7 @@ ob_end_clean();
                                 <h3 class="products__name"><?= htmlspecialchars($product['NamaMenu']) ?></h3>
                                 <span class="products__price">$<?= htmlspecialchars($product['Harga']) ?></span>
 
-                                <button class="products__button">
+                                <button class="products__button" onclick="addToCart(<?= $product['MenuID'] ?>, '<?= htmlspecialchars($product['NamaMenu']) ?>')">
                                     <i class="ri-shopping-bag-3-fill"></i>
                                 </button>
                             </div>
@@ -384,5 +440,100 @@ ob_end_clean();
 
     <!--=============== MAIN JS ===============-->
     <script src="assets/js/main.js"></script>
+    
+    <!--=============== CART JS ===============-->
+    <script>
+        // Add to cart function
+        async function addToCart(menuId, menuName) {
+            try {
+                const button = event.target.closest('.products__button');
+                button.classList.add('adding');
+                
+                const response = await fetch('cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=add&menu_id=${menuId}&quantity=1`
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update cart count
+                    const cartCount = document.getElementById('cart-count');
+                    cartCount.textContent = result.cart_count;
+                    cartCount.style.display = result.cart_count > 0 ? 'flex' : 'none';
+                    
+                    // Show notification
+                    showCartNotification();
+                }
+                
+                setTimeout(() => {
+                    button.classList.remove('adding');
+                }, 600);
+                
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+            }
+        }
+        
+        // Show cart notification
+        function showCartNotification() {
+            const notification = document.getElementById('cart-notification');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Update cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount.textContent === '0' || cartCount.textContent === '') {
+                cartCount.style.display = 'none';
+            }
+        });
+    </script>
 </body>
-</html>
+</html>" alt="image" class="popular__bean-1">
+                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
+                                <img src="assets/img/popular-coffee-1.png" alt="image" class="popular__coffee">
+                            </div>
+
+                            <div class="popular__data">
+                                <h2 class="popular__name">VANILLA LATTE</h2>
+
+                                <p class="popular__description">
+                                    Indulge in the simplicity of our delicicous cold brew coffee.
+                                </p>
+
+                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
+                            </div>
+                        </article>
+
+                        <article class="popular__card swiper-slide">
+                            <div class="popular__images">
+                                <div class="popular__shape"></div>
+                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
+                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
+                                <img src="assets/img/popular-coffee-2.png" alt="image" class="popular__coffee">
+                            </div>
+
+                            <div class="popular__data">
+                                <h2 class="popular__name">CLASSIC COFFEE</h2>
+
+                                <p class="popular__description">
+                                    Indulge in the simplicity of our delicicous cold brew coffee.
+                                </p>
+
+                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
+                            </div>
+                        </article>
+
+                        <article class="popular__card swiper-slide">
+                            <div class="popular__images">
+                                <div class="popular__shape"></div>
+                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
+                                <img src="assets/img/bean-img.png
