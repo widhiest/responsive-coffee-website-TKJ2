@@ -73,6 +73,10 @@ body {
 body {
   background-color: var(--body-color);
   color: var(--text-color);
+  /* FIX: Ensure proper layout structure */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 input,
@@ -125,6 +129,8 @@ img {
 
 .main {
   overflow: hidden;
+  /* FIX: Ensure main takes available space */
+  flex: 1;
 }
 
 /*=============== HEADER & NAV ===============*/
@@ -214,6 +220,56 @@ img {
 }
 
 /* Active link */
+
+/* user & logout & login */
+.nav__user-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nav__logout-link {
+    position: absolute;
+    top: 150%; /* Tempatkan di bawah nama pengguna */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    background-color: var(--first-color-alt);
+    border-radius: 0.5rem;
+}
+
+/* Tampilkan tombol logout saat mengarahkan kursor ke wadah */
+/* .nav__user-container:hover .nav__logout-link {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+
+    transition: transform 0.3s ease, opacity 0.7s ease;
+} */
+
+/* Kelas ini akan ditambahkan oleh JavaScript saat nama diklik */
+.nav__user-container.show-logout .nav__logout-link {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+
+    transition: transform 0.3s ease, opacity 0.7s ease;
+}
+
+/* login */
+#login-button i {
+  font-size: 24px; /* ubah sesuai kebutuhan */
+
+  position: relative;
+  top: 3px;
+}
 
 
 /*=============== HOME ===============*/
@@ -489,6 +545,9 @@ img {
 /*=============== PRODUCTS ===============*/
 .products{
   background-color: var(--body-first-color);
+  /* FIX: Ensure proper section containment */
+  position: relative;
+  z-index: 1;
 }
 
 .products .section__title{
@@ -497,12 +556,18 @@ img {
 
 .products__container{
   grid-template-columns: repeat(2, 1fr);
+  /* FIX: Ensure grid is properly contained */
+  width: 100%;
+  max-width: 100%;
 }
 
 .products__card{
   position: relative;
   background-color: var(--dark-color);
   padding: 1rem .5rem 1.25rem;
+  /* FIX: Ensure cards don't overflow */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .products__images{
@@ -769,11 +834,6 @@ img {
   bottom: 3rem;
 }
 
-/* Show Scroll Up */
-
-
-/* Tambahkan CSS ini ke file styles.css yang sudah ada */
-
 /*=============== CART NAVIGATION STYLES ===============*/
 .nav__actions {
   display: flex;
@@ -808,7 +868,6 @@ img {
   justify-content: center;
   font-weight: var(--font-semi-bold);
   min-width: 20px;
-  animation: cartBounce 0.5s ease;
 }
 
 .cart-count:empty {
@@ -876,7 +935,7 @@ img {
 }
 
 /*=============== CART NOTIFICATION ===============*/
-.cart-notification {
+/* .cart-notification {
   position: fixed;
   top: 100px;
   right: 20px;
@@ -897,7 +956,7 @@ img {
 
 .cart-notification i {
   font-size: 1.25rem;
-}
+} */
 
 /*=============== CART PAGE STYLES ===============*/
 .cart-container {
@@ -1136,6 +1195,140 @@ img {
   color: #e74c3c;
 }
 
+/*==================== POPUP LOGIN/REGISTER ====================*/
+.login-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s, visibility .3s;
+    z-index: 1000;
+}
+
+.login-popup.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.login-popup__content {
+    background-color: var(--body-white-color);
+    padding: 2.5rem 2rem;
+    border-radius: 1rem;
+    position: relative;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 32px hsla(166, 95%, 12%, .15);
+    animation: popup .4s cubic-bezier(.175, .885, .32, 1.275);
+}
+
+@keyframes popup {
+    0% {
+        transform: scale(0.5);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.login-popup__close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--title-color);
+    transition: .3s;
+}
+
+.login-popup__close:hover {
+    color: var(--first-color);
+}
+
+.login-form,
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.login-form__title,
+.register-form__title {
+    font-size: var(--h2-font-size);
+    font-weight: var(--font-semi-bold);
+    color: var(--title-color);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.login-form__input-group,
+.register-form__input-group {
+    position: relative;
+}
+
+.login-form__icon,
+.register-form__icon {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    color: var(--text-color);
+}
+
+.login-form__input-group input,
+.register-form__input-group input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: 1px solid var(--text-color);
+    border-radius: .5rem;
+    font-size: var(--normal-font-size);
+    color: var(--title-color);
+    background-color: transparent;
+}
+
+.login-form__input-group input:focus,
+.register-form__input-group input:focus {
+    outline: none;
+    border-color: var(--first-color);
+}
+
+.login-form .button,
+.register-form .button {
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+}
+
+.login-form__switch,
+.register-form__switch {
+    text-align: center;
+    font-size: var(--small-font-size);
+    color: var(--text-color);
+    margin-top: -0.5rem;
+}
+
+.login-form__link,
+.register-form__link {
+    color: var(--first-color);
+    font-weight: var(--font-semi-bold);
+    cursor: pointer;
+}
+
+.login-form__message,
+.register-form__message {
+    text-align: center;
+    font-size: var(--small-font-size);
+    margin-top: -0.5rem;
+    min-height: 1.5rem;
+}
+
 /*=============== RESPONSIVE CART STYLES ===============*/
 @media screen and (max-width: 1150px) {
   .nav__actions {
@@ -1177,7 +1370,7 @@ img {
   .cart-notification {
     right: 10px;
     left: 10px;
-    transform: translateY(-100%);
+    transform: translateY(-100%); 
   }
   
   .cart-notification.show {
@@ -1625,7 +1818,7 @@ img {
 }
 
 /* For 2K resolutions (2048 x 1152, 2048 x 1536) */
-@media screen and (min-witdh: 2048px ){
+@media screen and (min-width: 2048px ){
   body{
     zoom: 1.3;
   }

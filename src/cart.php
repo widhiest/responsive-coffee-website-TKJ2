@@ -24,7 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['cart'][$menuId] = $quantity;
                 }
                 
-                echo json_encode(['success' => true, 'cart_count' => array_sum($_SESSION['cart'])]);
+                // Return JSON response for AJAX
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true, 
+                    'cart_count' => array_sum($_SESSION['cart']),
+                    'message' => 'Item added to cart successfully'
+                ]);
                 exit;
                 break;
                 
@@ -83,8 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                         
-                        // Insert transaction
-                        $stmt = $pdo->prepare("INSERT INTO Transaksi (CustomerID, Tanggal, TotalBayar, MetodePembayaran) VALUES (?, NOW(), ?, ?)");
+                        // Insert transaction - FIX: Set PegawaiID to NULL or default value
+                        $stmt = $pdo->prepare("INSERT INTO Transaksi (CustomerID, PegawaiID, Tanggal, TotalBayar, MetodePembayaran) VALUES (?, NULL, NOW(), ?, ?)");
                         $stmt->execute([$customerId, $total, $_POST['metode_pembayaran']]);
                         $transaksiId = $pdo->lastInsertId();
                         
@@ -99,14 +105,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ]);
                             
                             // Update stock
-                            $stmt = $pdo->prepare("UPDATE Menu SET Stok = Stok - ? WHERE MenuID = ?");
-                            $stmt->execute([$item['quantity'], $item['menu']['MenuID']]);
+                            // $stmt = $pdo->prepare("UPDATE Menu SET Stok = Stok - ? WHERE MenuID = ?");
+                            // $stmt->execute([$item['quantity'], $item['menu']['MenuID']]);
                         }
                         
                         $pdo->commit();
                         $_SESSION['cart'] = [];
-                        $message = 'Order berhasil dibuat! ID Transaksi: ' . $transaksiId;
-                        $messageType = 'success';
+                        $_SESSION['last_order'] = [
+                            'transaction_id' => $transaksiId,
+                            'customer_name' => $_POST['nama'],
+                            'customer_email' => $_POST['email'],
+                            'customer_phone' => $_POST['nomor_hp'],
+                            'total' => $total,
+                            'payment_method' => $_POST['metode_pembayaran'],
+                            'items' => $cartItems,
+                            'date' => date('Y-m-d H:i:s')
+                        ];
+                        
+                        // Redirect to invoice page
+                        header('Location: invoice.php');
+                        exit;
                         
                     } catch (Exception $e) {
                         $pdo->rollBack();

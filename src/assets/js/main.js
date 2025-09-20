@@ -344,3 +344,153 @@ sr.reveal(".about__leaf-1, .about__leaf-2", { delay: 1400, rotate: { z: 90 } });
 sr.reveal(".products__card, .contact__info", { interval: 100 });
 sr.reveal(".contact__shape", { delay: 600, scale: 0 });
 sr.reveal(".contact__delivery", { delay: 1200 });
+
+/*=============== POPUP LOGIN/REGISTER ===============*/
+const loginButton = document.getElementById('login-button'),
+      loginPopup = document.getElementById('login-popup'),
+      loginClose = document.getElementById('login-close'),
+      loginForm = document.getElementById('login-form'),
+      registerForm = document.getElementById('register-form'),
+      registerLink = document.getElementById('register-link'),
+      loginLink = document.getElementById('login-link'),
+      loginMessage = document.getElementById('login-message'),
+      registerMessage = document.getElementById('register-message');
+
+// Show login pop-up
+if (loginButton && loginPopup && loginClose) {
+    loginButton.addEventListener('click', () => {
+        loginPopup.classList.add('show');
+    });
+
+    loginClose.addEventListener('click', () => {
+        loginPopup.classList.remove('show');
+        resetFormMessages();
+    });
+}
+
+// Switch between login and register forms
+if (registerLink && loginLink) {
+    registerLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'flex';
+        resetFormMessages();
+    });
+
+    loginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.style.display = 'none';
+        loginForm.style.display = 'flex';
+        resetFormMessages();
+    });
+}
+
+function resetFormMessages() {
+    loginMessage.textContent = '';
+    registerMessage.textContent = '';
+}
+
+// Handle login and register forms
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(loginForm);
+        const submitBtn = loginForm.querySelector('button');
+
+        submitBtn.textContent = 'Memproses...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('login_register.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                loginMessage.textContent = 'Berhasil masuk! Mengarahkan...';
+                loginMessage.style.color = 'var(--first-color)';
+                setTimeout(() => {
+                    window.location.href = 'index.php'; // Ganti dengan halaman dashboard jika ada
+                }, 1000);
+            } else {
+                loginMessage.textContent = result.message;
+                loginMessage.style.color = '#ff6347'; // Tomato color for error
+            }
+        } catch (error) {
+            loginMessage.textContent = 'Terjadi kesalahan. Coba lagi.';
+            loginMessage.style.color = '#ff6347';
+            console.error('Error:', error);
+        } finally {
+            submitBtn.textContent = 'Masuk';
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(registerForm);
+        formData.append('action', 'register');
+        const submitBtn = registerForm.querySelector('button');
+
+        submitBtn.textContent = 'Memproses...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('login_register.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                registerMessage.textContent = 'Registrasi berhasil! Silakan masuk.';
+                registerMessage.style.color = 'var(--first-color)';
+                setTimeout(() => {
+                    registerForm.style.display = 'none';
+                    loginForm.style.display = 'flex';
+                    resetFormMessages();
+                }, 1000);
+            } else {
+                registerMessage.textContent = result.message;
+                registerMessage.style.color = '#ff6347';
+            }
+        } catch (error) {
+            registerMessage.textContent = 'Terjadi kesalahan. Coba lagi.';
+            registerMessage.style.color = '#ff6347';
+            console.error('Error:', error);
+        } finally {
+            submitBtn.textContent = 'Daftar';
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// logout button
+document.addEventListener("DOMContentLoaded", () => {
+  const userContainer = document.querySelector(".nav__user-container");
+  const userNameLink = document.querySelector(".nav__user-name-link");
+
+  if (userNameLink && userContainer) {
+    userNameLink.addEventListener("click", (event) => {
+      // Mencegah link pindah halaman
+      event.preventDefault();
+      // Menampilkan/menyembunyikan tombol logout
+      userContainer.classList.toggle("show-logout");
+    });
+
+    // Menyembunyikan tombol logout jika mengklik di luar area
+    document.addEventListener("click", (event) => {
+      if (
+        !userContainer.contains(event.target) &&
+        userContainer.classList.contains("show-logout")
+      ) {
+        userContainer.classList.remove("show-logout");
+      }
+    });
+  }
+});

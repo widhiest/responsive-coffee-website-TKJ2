@@ -107,7 +107,7 @@ ob_end_clean();
         .cart-notification {
             position: fixed;
             top: 100px;
-            right: 20px;
+            right: -10px;
             background: var(--first-color);
             color: var(--white-color);
             padding: 1rem 1.5rem;
@@ -119,7 +119,7 @@ ob_end_clean();
         }
         
         .cart-notification.show {
-            transform: translateX(0);
+            transform: translateX(-30px);
         }
         
         @media screen and (max-width: 1150px) {
@@ -166,6 +166,28 @@ ob_end_clean();
                     <i class="ri-shopping-cart-line"></i>
                     <span class="cart-count" id="cart-count"><?= array_sum($_SESSION['cart']) > 0 ? array_sum($_SESSION['cart']) : '' ?></span>
                 </a>
+
+                <!-- login button -->
+                <!-- <button class="nav__button" id="login-button">
+                    <i class="ri-user-line"></i>
+                </button> -->
+                <?php 
+                if (isset($_SESSION['user_name'])) {
+                    // Tampilkan nama pengguna dalam wadah, dengan tombol logout tersembunyi
+                    echo '
+                    <div class="nav__user-container">
+                        <a href="#" class="nav__link nav__user-name-link">
+                            ' . htmlspecialchars($_SESSION['user_name']) . '
+                        </a>
+                        <a href="logout.php" class="nav__link nav__logout-link button">
+                            Logout
+                        </a>
+                    </div>';
+                } else {
+                    // Tampilkan tombol Masuk
+                    echo '<a href="#" class="nav__link nav__icon-button" id="login-button"><i class="ri-user-3-line"></i></a>';
+                }
+                ?>
                 
                 <!-- Toggle button -->
                 <div class="nav__toggle" id="nav-toggle">
@@ -183,6 +205,57 @@ ob_end_clean();
         </div>
     </div>
 
+    <!--==================== login pop up ====================-->
+    <div class="login-popup" id="login-popup">
+        <div class="login-popup__content">
+            <div class="login-popup__close" id="login-close">
+                <i class="ri-close-line"></i>
+            </div>
+            
+            <form class="login-form" id="login-form">
+                <h2 class="login-form__title">Masuk ke Akun</h2>
+                <div class="login-form__input-group">
+                    <i class="ri-mail-line login-form__icon"></i>
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="login-form__input-group">
+                    <i class="ri-lock-line login-form__icon"></i>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="button">Masuk</button>
+                <p class="login-form__switch">
+                    Belum punya akun? <span class="login-form__link" id="register-link">Daftar di sini</span>
+                </p>
+                <div class="login-form__message" id="login-message"></div>
+            </form>
+
+            <form class="register-form" id="register-form" style="display: none;">
+                <h2 class="register-form__title">Buat Akun Baru</h2>
+                <div class="register-form__input-group">
+                    <i class="ri-user-line register-form__icon"></i>
+                    <input type="text" name="username" placeholder="Nama Lengkap" required>
+                </div>
+                <div class="register-form__input-group">
+                    <i class="ri-mail-line register-form__icon"></i>
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="register-form__input-group">
+                    <i class="ri-phone-line register-form__icon"></i>
+                    <input type="text" name="nomorHP" placeholder="Nomor HP" required>
+                </div>
+                <div class="register-form__input-group">
+                    <i class="ri-lock-line register-form__icon"></i>
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="button">Daftar</button>
+                <p class="register-form__switch">
+                    Sudah punya akun? <span class="register-form__link" id="login-link">Masuk di sini</span>
+                </p>
+                <div class="register-form__message" id="register-message"></div>
+            </form>
+        </div>
+    </div>
+    
     <!--==================== MAIN ====================-->
     <main class="main">
         <!--==================== HOME ====================-->
@@ -497,43 +570,3 @@ ob_end_clean();
         });
     </script>
 </body>
-</html>" alt="image" class="popular__bean-1">
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
-                                <img src="assets/img/popular-coffee-1.png" alt="image" class="popular__coffee">
-                            </div>
-
-                            <div class="popular__data">
-                                <h2 class="popular__name">VANILLA LATTE</h2>
-
-                                <p class="popular__description">
-                                    Indulge in the simplicity of our delicicous cold brew coffee.
-                                </p>
-
-                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
-                            </div>
-                        </article>
-
-                        <article class="popular__card swiper-slide">
-                            <div class="popular__images">
-                                <div class="popular__shape"></div>
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-2">
-                                <img src="assets/img/popular-coffee-2.png" alt="image" class="popular__coffee">
-                            </div>
-
-                            <div class="popular__data">
-                                <h2 class="popular__name">CLASSIC COFFEE</h2>
-
-                                <p class="popular__description">
-                                    Indulge in the simplicity of our delicicous cold brew coffee.
-                                </p>
-
-                                <a href="#contact" class="button button-dark">Order now: $19.00</a>
-                            </div>
-                        </article>
-
-                        <article class="popular__card swiper-slide">
-                            <div class="popular__images">
-                                <div class="popular__shape"></div>
-                                <img src="assets/img/bean-img.png" alt="image" class="popular__bean-1">
-                                <img src="assets/img/bean-img.png
